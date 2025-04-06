@@ -8,6 +8,7 @@ const sqlConnection = sql.createPool({
     user: process.env.USER,
     password:process.env.KEY,
     database:process.env.DATA,
+    port:process.env.PORTDATA,
     waitForConnections: true,
     connectionLimit: 10,
     maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
@@ -15,6 +16,9 @@ const sqlConnection = sql.createPool({
     queueLimit: 0,
     enableKeepAlive: true,
     keepAliveInitialDelay: 0,
+    ssl: {
+        rejectUnauthorized: false, // Important for secure connection
+      }
 })
 
 module.exports = sqlConnection

@@ -1,8 +1,9 @@
 const express = require("express")
-const { isAccountExist } = require("../../controllers/admin/authController")
+const {createAccount, logIntoAccount } = require("../../controllers/admin/authController")
 
 const AuthRouter = express.Router()
 
-AuthRouter.post("/",isAccountExist)
+AuthRouter.post("/",createAccount)
+AuthRouter.post("/login",logIntoAccount)
 
 module.exports = AuthRouter

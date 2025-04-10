@@ -1,42 +1,18 @@
 adminCategoryReq = require("../../config/init")
 
-const countCategory = async(req,res)=>{
-    try{
-        
-        const [data] = await adminCategoryReq.query("SELECT COUNT(*) FROM category")
-
-        if(!data){
-            res.status(404).send({
-                success:false, 
-                message:"Data Inexistent"
-            })
-        }
-
-        res.status(201).send({
-            success:true, 
-            data
-        })
-   }catch(err){
-        res.status(500).send({
-            success:true, 
-            message:`${err} Occur`
-        })
-   }
-}
-
 const listCategories = async(req,res)=>{
     try{
         
         const [data] = await adminCategoryReq.query("SELECT * FROM category")
 
         if(!data){
-            res.status(404).send({
+            return res.status(404).send({
                 success:false, 
                 message:"Data Inexistent"
             })
         }
 
-        res.status(200).send(data)
+        return res.status(200).send(data)
    }catch(err){
         res.status(500).send({
             success:true, 
@@ -46,34 +22,44 @@ const listCategories = async(req,res)=>{
 }
 
 const createCategory = async(req,res)=>{
-    
+
    try{
         
         const {name} = req.body
 
         if(!name){
-            res.status(500).send({
+            return  res.status(500).send({
                 success:false,
                 message: "Data Not Provided"
+            })
+        }
+
+        const [exist] = await adminCategoryReq.query("SELECT * FROM `category` WHERE name=?",[name])
+
+        if(exist.length > 0){
+           return res.status(400).send({
+                success:false,
+                message: "Already In Use"
             })
         }
 
         const [data] = await adminCategoryReq.query("INSERT INTO `category`(`name`) VALUES (?)",[name])
 
         if(!data){
-            res.status(404).send({
+            return res.status(404).send({
                 success:false, 
                 message:`Data Not Added`
             })
         }
 
-        res.status(201).send({
+        return res.status(201).send({
             success:true, 
             message:`Data Succesfully Added`
         })
+        
    }catch(err){
-        res.status(500).send({
-            succes:true, 
+    return res.status(500).send({
+            succes:false, 
             message:`${err} Occur`
         })
    }
@@ -84,7 +70,7 @@ const updateCategory = async(req,res)=>{
         const categoryID = req.params.category
 
         if(!categoryID){
-            res.status(500).send({
+            return res.status(500).send({
                 success:false,
                 message: "Data Not Provided"
             })
@@ -93,7 +79,7 @@ const updateCategory = async(req,res)=>{
         const {name} = req.body
 
         if(!name){
-            res.status(500).send({
+            return  res.status(500).send({
                 success:false,
                 message: "Date Not Received"
             })
@@ -102,22 +88,22 @@ const updateCategory = async(req,res)=>{
         const [data] = adminMenuReq.query("UPDATE `category` SET `name`=? WHERE categoryId= ?",[name, categoryID])
 
         if(!data){
-            res.status(404).send({
+            return res.status(404).send({
                 success:false, 
                 message:" Data Not Edited"
             })
         }
 
-        res.status(201).send({
+        return res.status(201).send({
             success:true, 
             message:"Data Succesfully Edited"
         })
    }catch(err){
-        res.status(500).send({
+        return res.status(500).send({
             success:true, 
             message:`${err} Occur`
         })
    }
 }
 
-module.exports = {countCategory, listCategories, createCategory, updateCategory}
+module.exports = {listCategories, createCategory, updateCategory}

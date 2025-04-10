@@ -4,6 +4,7 @@ const morgan = require("morgan")
 const body = require("body-parser")
 const cors = require("cors")
 const init = require("./config/init")
+const authToken = require("./middleware/authentification")
 
 
 //REST OBJECT
@@ -34,6 +35,6 @@ SERVER.use("/api/v1/client/guy-delight/menu",require("./routes/client/itemRoutes
 
 //admin
 SERVER.use("/api/v1/admin/guy-delight/auth", require("./routes/admin/authRoutes"))
-SERVER.use("/api/v1/admin/guy-delight/group",require("./routes/admin/adminGroupRoutes"))
-SERVER.use("/api/v1/admin/guy-delight/menu",require("./routes/admin/adminItemRoutes"))
+SERVER.use("/api/v1/admin/guy-delight/group", require("./routes/admin/adminGroupRoutes"))
+SERVER.use("/api/v1/admin/guy-delight/menu", require("./routes/admin/adminItemRoutes"))
 

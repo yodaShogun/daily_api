@@ -5,7 +5,7 @@ const upload = require("../../config/directory")
 const itemRouter = express.Router()
 
 //fetch Data
-itemRouter.get("/",countItem)
+
 itemRouter.get("/list",listItem)
 
 //send data to database

@@ -1,21 +1,46 @@
 const authReq = require("../../config/init")
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-
-const isAccountExist = async(req,res)=>{
+const createAccount = async(req,res)=>{
     try {
-        const {account} = req.body
-        const [data] = await authReq.query("SELECT COUNT(*) as data FROM `accounts` WHERE account=?",[account])
-        if(!data){
-            res.status(404).send({
+
+        const {account, key} = req.body
+
+        if(!account || !key){
+            return res.status(404).send({
                 success:false,
-                message: `${error} While Loging`
+                message: `Data Not Provided`
             })
         }
 
-        return data
+        const [exists] = await authReq.query("SELECT * FROM `accounts` WHERE account=?",[account])
         
+        if(exists.length > 0){
+            return res.status(400).send({
+                success:false,
+                message: `Username Non Available`
+            })
+        }
+
+        const encryptedKey = await bcrypt.hash(key,12)
+
+        const data = await authReq.query("INSERT INTO `accounts`(`account`, `key`) VALUES (?,?)",[account,encryptedKey])
+
+        if(!data){
+            return res.status(400).send({
+                success:false,
+                message: `Registration Failed`
+            })
+        }
+
+        return res.status(201).send({
+            success:true,
+            message:"Registration Succeed"
+        }) 
+
     } catch (error) {
-        res.status(500).send({
+        return res.status(500).send({
             success:false,
             message: `${error} While Loging`
         })
@@ -34,7 +59,16 @@ const logIntoAccount = async(req,res)=>{
             })
         }
 
-        const data = await authReq.query("INSERT INTO `accounts`(`account`, `key`) VALUES (?,?)",[account,key])
+        const [user] = await authReq.query("SELECT * FROM `accounts` WHERE account=?",[account])
+       
+        if (user.length === 0) return res.status(404).json({ success:false, message: "User not found" });
+
+        const valid = await bcrypt.compare(key, user[0].key);
+        if (!valid) return res.status(401).json({ message: "Invalid credentials" });
+
+        const token = jwt.sign({ id: user[0].accountId, email: user[0].account }, process.env.JWT_SECRET, {});
+
+        res.status(201).json({ token });
         
     } catch (error) {
         res.status(500).send({
@@ -44,25 +78,5 @@ const logIntoAccount = async(req,res)=>{
     }
 }
 
-const createAccount = async(req,res)=>{
-    try {
 
-        const {account, phone, key} = req.body
-
-        if(!account || !key){
-            res.status(404).send({
-                success:false,
-                message: `Data Not Provided`
-            })
-        }
-
-        const data = await authReq.query("INSERT INTO `accounts`(`account`, `phone`, `key`) VALUES (?,?,?)",[account,phone,key])
-        
-    } catch (error) {
-        res.status(500).send({
-            success:false,
-            message: `${error} While Loging`
-        })
-    }
-}
-module.exports = {isAccountExist, logIntoAccount, createAccount}
+module.exports = {logIntoAccount, createAccount}
